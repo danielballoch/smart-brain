@@ -1,22 +1,15 @@
 import React from 'react';
+import RightNav from './RightNav'
+import Logo from '../Logo/Logo';
+import './nav.css'
 
 const Navigation = ({ onRouteChange, isSignIn }) => {
-    
-        if (isSignIn) {
-            return (
-            <nav style={{display: 'flex', justifyContent: "flex-end"}}>
-                <p onClick={() => onRouteChange("signin")} className='f3 link dim black underline pa3 pointer'>Sign Out</p>
-            </nav>
-        );
-        } else {
-            return(
-            <nav style={{display: 'flex', justifyContent: "flex-end"}}>
-                <p onClick={() => onRouteChange("signin")} className='f3 link dim black underline pa3 pointer'>Sign In</p>
-                <p onClick={() => onRouteChange("register")} className='f3 link dim black underline pa3 pointer'>Register</p>
-            </nav>
-            );
-        }
-    
+    return (
+        <div className="wrapper">
+        <Logo/>
+        <RightNav onRouteChange={onRouteChange} isSignIn={isSignIn}/> 
+        </div>
+    )
 }
 
 export default Navigation;

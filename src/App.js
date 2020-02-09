@@ -1,11 +1,10 @@
 import React, { Component } from 'react';
 import Navigation from './components/Navigation/Navigation';
-import Logo from './components/Logo/Logo';
 import Rank from './components/Rank/Rank';
 import FaceRecognition from './components/FaceRecognition/FaceRecognition.js';
 import ImageLinkForm from './components/ImageLinkForm/ImageLinkForm';
-import SignIn from './components/SignIn/SignIn';
-import Register from './components/Register/Register';
+import SignIn from './components/User/SignIn/SignIn';
+import Register from './components/User/Register/Register';
 import Particles from 'react-particles-js';
 import './App.css';
 
@@ -70,6 +69,67 @@ class App extends Component {
         }})
     }
 
+    onSubmitRegister = (email, password, name) => {
+        fetch('http://localhost:3000/register', {
+           method: 'post',
+           headers: {'Content-Type': 'application/json'},
+           body: JSON.stringify({
+               email: email,
+               password: password,
+               name: name
+           }) 
+        })
+        .then(response => response.json())
+        .then(user => {
+            if(user.id){
+                //loadUser
+                this.props.loadUser(user);
+                this.props.onRouteChange('home')
+            } else {
+                this.setState({wrongDetails: true})
+            }
+        })
+        console.log(this.state);
+    }
+
+    createGuest = () => {
+        const email = 'guest@gmail.com';
+        const password = 'password';
+        const name = 'Guest';
+        fetch('http://localhost:3000/signin', {
+           method: 'post',
+           headers: {'Content-Type': 'application/json'},
+           body: JSON.stringify({
+               email: email,
+               password: password
+           }) 
+        })
+        .then(response => response.json())
+        .then(user => {
+            if(user.id){
+                console.log('guest already created')
+            } else {
+                //delete and re-create guest.
+                console.log('create guest')
+                this.deleteUser(email, password);
+                this.onSubmitRegister(email, password, name);
+            }
+        })
+    }
+
+    deleteUser = (email, password) => {
+        console.log(email, password)
+        fetch('http://localhost:3000/delete', {
+           method: 'delete',
+           headers: {'Content-Type': 'application/json'},
+           body: JSON.stringify({
+               email: email ,
+               password: password
+           }) 
+        })
+        .then(response => response.json())
+    }
+
 
     calculateFaceLocation = (data) => {
         const clarifaiFace = data.outputs[0].data.regions[0].region_info.bounding_box;
@@ -97,7 +157,7 @@ class App extends Component {
 
     onPictureSubmit = () => {
         this.setState({imgUrl: this.state.input})
-        fetch('https://floating-falls-31061.herokuapp.com/imageurl', {
+        fetch('http://localhost:3000/imageurl', {
             method: 'post',
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({
@@ -107,7 +167,7 @@ class App extends Component {
         .then(response => response.json())
         .then(response => {
             if(response){
-                fetch('https://floating-falls-31061.herokuapp.com/image', {
+                fetch('http://localhost:3000/image', {
                     method: 'put',
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({
@@ -134,10 +194,14 @@ class App extends Component {
 
         document.body.appendChild(script);
 
-        fetch('https://floating-falls-31061.herokuapp.com/')
+        fetch('http://localhost:3000/')
         .then(response => response.json())
         .then(console.log)
+        this.createGuest();
+        
+
     }
+
 
     onRouteChange = (route) => {
         if (route === 'signin'){
@@ -154,7 +218,7 @@ class App extends Component {
             <div className="App">
             <Particles className='particles' params={particleOptions}/>
             <Navigation isSignIn={isSignIn} onRouteChange={this.onRouteChange}/>
-            <Logo/>
+            {/* <Logo/> */}
             { route === 'home'?  
             <div>
                 <Rank name={this.state.user.name} entries={this.state.user.entries}/>
